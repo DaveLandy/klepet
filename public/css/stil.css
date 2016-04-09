@@ -57,3 +57,9 @@ a {
 #pomoc {
   font: 10px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
+
+#youtube {
+  height: 150px;
+  width: 200px;
+  margin-left: 20px;
+}
