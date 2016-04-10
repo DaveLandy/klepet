@@ -11,16 +11,16 @@ function divElementEnostavniTekst(sporocilo) {
         sporociloNovo = sporociloNovo.replace(splitText[i], splitTextNovo[i]);
         //return $('<div style="font-weight: bold"></div>').html(sporocilo);
       }
-      else {
-        var jeSlika = sporocilo.indexOf('http') > -1;
-        if(jeSlika){
+      else if(splitText[i].indexOf('https://www.youtube.com/watch?v=') > -1){
+        splitTextNovo[i] = splitText[i].replace(/\</g, '&lt;').replace(/\>/g, '&gt;').replace('&lt;iframe', '<iframe');
+        sporociloNovo = sporociloNovo.replace(splitText[i], splitTextNovo[i]);
+      }
+      else{
+        var slika = splitText[i].indexOf('.jpg') + splitText[i].indexOf('.png') + splitText[i].indexOf('.gif');
+        if(splitText[i].indexOf('http') > -1 && slika > -2){
           splitTextNovo[i] = splitText[i].replace(/\</g, '&lt;').replace(/\>/g, '&gt;').replace('&lt;img', '<img').replace('png\' /&gt;', 'png\' />').replace('jpg\' /&gt;', 'jpg\' />').replace('gif\' /&gt;', 'gif\' />');
           sporociloNovo = sporociloNovo.replace(splitText[i], splitTextNovo[i]);
         }
-          //return $('<div style="font-weight: bold;"></div>').html(sporociloNovo);
-        /*else{
-          return $('<div style="font-weight: bold;"></div>').text(sporociloNovo);
-        }*/
       }
     }
     return $('<div style="font-weight: bold;"></div>').html(sporociloNovo);
@@ -36,6 +36,7 @@ function procesirajVnosUporabnika(klepetApp, socket) {
   var sporocilo = $('#poslji-sporocilo').val();
   sporocilo = dodajSmeske(sporocilo);
   sporocilo = dodajSliko(sporocilo);
+  sporocilo = dodajVideo(sporocilo);
   var sistemskoSporocilo;
 
   if (sporocilo.charAt(0) == '/') {
@@ -181,6 +182,17 @@ function dodajSliko(vhodnoBesedilo){
       vhodnoBesedilo = vhodnoBesedilo + 
         " <img id=\"slika\" src='" + url + "' />";
     }
+  }
+  return vhodnoBesedilo;
+}
+
+function dodajVideo(vhodnoBesedilo){
+  var text = vhodnoBesedilo;
+  var splitText = text.split("https://www.youtube.com/watch?v=");
+  console.log(splitText);
+  for(var i = 1; i < splitText.length; i++){
+    splitText[i] = " <iframe id=\"youtube\" src=\"https://www.youtube.com/embed/" + splitText[i] + "\" allowfullscreen></iframe>";
+    vhodnoBesedilo += splitText[i];
   }
   return vhodnoBesedilo;
 }
