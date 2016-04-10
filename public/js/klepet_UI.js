@@ -1,11 +1,31 @@
 function divElementEnostavniTekst(sporocilo) {
-  var jeSmesko = sporocilo.indexOf('http://sandbox.lavbic.net/teaching/OIS/gradivo/') > -1;
-  if (jeSmesko) {
-    sporocilo = sporocilo.replace(/\</g, '&lt;').replace(/\>/g, '&gt;').replace('&lt;img', '<img').replace('png\' /&gt;', 'png\' />');
-    return $('<div style="font-weight: bold"></div>').html(sporocilo);
-  } else {
-    return $('<div style="font-weight: bold;"></div>').text(sporocilo);
+  var splitText = sporocilo.split("http");
+  var splitTextNovo = splitText;
+  var sporociloNovo = sporocilo;
+  if(splitText.length > 1){
+    for(var i = 0; i < splitText.length; i++){
+      splitText[i] = "http" + splitText[i];
+      var jeSmesko = splitText[i].indexOf('http://sandbox.lavbic.net/teaching/OIS/gradivo/') > -1;
+      if (jeSmesko) {
+        splitTextNovo[i] = splitText[i].replace(/\</g, '&lt;').replace(/\>/g, '&gt;').replace('&lt;img', '<img').replace('png\' /&gt;', 'png\' />');
+        sporociloNovo = sporociloNovo.replace(splitText[i], splitTextNovo[i]);
+        //return $('<div style="font-weight: bold"></div>').html(sporocilo);
+      }
+      else {
+        var jeSlika = sporocilo.indexOf('http') > -1;
+        if(jeSlika){
+          splitTextNovo[i] = splitText[i].replace(/\</g, '&lt;').replace(/\>/g, '&gt;').replace('&lt;img', '<img').replace('png\' /&gt;', 'png\' />').replace('jpg\' /&gt;', 'jpg\' />').replace('gif\' /&gt;', 'gif\' />');
+          sporociloNovo = sporociloNovo.replace(splitText[i], splitTextNovo[i]);
+        }
+          //return $('<div style="font-weight: bold;"></div>').html(sporociloNovo);
+        /*else{
+          return $('<div style="font-weight: bold;"></div>').text(sporociloNovo);
+        }*/
+      }
+    }
+    return $('<div style="font-weight: bold;"></div>').html(sporociloNovo);
   }
+  else return $('<div style="font-weight: bold;"></div>').text(sporociloNovo);
 }
 
 function divElementHtmlTekst(sporocilo) {
@@ -15,6 +35,7 @@ function divElementHtmlTekst(sporocilo) {
 function procesirajVnosUporabnika(klepetApp, socket) {
   var sporocilo = $('#poslji-sporocilo').val();
   sporocilo = dodajSmeske(sporocilo);
+  sporocilo = dodajSliko(sporocilo);
   var sistemskoSporocilo;
 
   if (sporocilo.charAt(0) == '/') {
@@ -131,9 +152,35 @@ function dodajSmeske(vhodnoBesedilo) {
     ":(": "sad.png"
   }
   for (var smesko in preslikovalnaTabela) {
-    vhodnoBesedilo = vhodnoBesedilo.replace(smesko,
-      "<img src='http://sandbox.lavbic.net/teaching/OIS/gradivo/" +
-      preslikovalnaTabela[smesko] + "' />");
+      var zamenjava = "<img src='http://sandbox.lavbic.net/teaching/OIS/gradivo/" +
+      preslikovalnaTabela[smesko] + "' />";
+      vhodnoBesedilo = vhodnoBesedilo.split(smesko).join(zamenjava);
+  }
+  return vhodnoBesedilo;
+}
+
+function dodajSliko(vhodnoBesedilo){
+  var text = vhodnoBesedilo;
+  var splitText = text.split("http");
+  for(var i = 0; i < splitText.length; i++){
+    splitText[i] = "http" + splitText[i];
+    var start = splitText[i].indexOf("http");
+    var end = -1;
+    var smesko = splitText[i].indexOf("sandbox.lavbic.net");
+    if(splitText[i].indexOf(".jpg") != -1){
+      end = splitText[i].indexOf(".jpg");
+    }
+    else if(splitText[i].indexOf(".png") != -1){
+      end = splitText[i].indexOf(".png");
+    }
+    else{
+      end = splitText[i].indexOf(".gif");
+    }
+    if(start != -1 && end != -1 && smesko == -1){
+      var url = splitText[i].substring(start, end+4);
+      vhodnoBesedilo = vhodnoBesedilo + 
+        " <img id=\"slika\" src='" + url + "' />";
+    }
   }
   return vhodnoBesedilo;
 }
